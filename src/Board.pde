@@ -60,8 +60,9 @@ class Board {
         pieces[first.i][first.j] = null;
         player = player=='w'?'b':'w';
       } else {
-        first = new Tuple(y/w, x/w);
+        first = null;
         last = null;
+        update(x,y);
       }
     } else {
       first = null;
@@ -74,8 +75,87 @@ class Board {
     Piece firstPiece = pieces[first.i][first.j];
     Piece lastPiece = pieces[last.i][last.j];
     
-    if (lastPiece == null) return true;
-    if (firstPiece.colr != lastPiece.colr) return true;
+    boolean possible = (lastPiece == null) ||
+      (firstPiece.colr != lastPiece.colr);
+    if (possible) {
+      if (checkMove()) {
+        return !jump();
+      }
+    } else {
+      return false;
+    }
+  }
+  
+  boolean checkMove() {
+    Piece firstPiece = pieces[first.i][first.j];
+    Piece lastPiece = pieces[last.i][last.j];
+    
+    int dx = last.j - first.j;
+    int dy = last.i - first.i;
+    
+    char c = firstPiece.colr;
+    
+    if (firstPiece.type == 'K') {
+      if (castling()) {
+        return true;
+      } else {
+        return (dx>=-1 && dx<=1) && (dy>=-1 && dy<=1);
+      }
+    } else if (firstPiece.type == 'R') {
+      return (dx==0 || dy==0);
+    } else if (firstPiece.type == 'B') {
+      return (abs(dx) == abs(dy));
+    } else if (firstPiece.type == 'Q') {
+      return (dx==0 || dy==0) || (abs(dx) == abs(dy));
+    } else if (firstPiece.type == 'N') {
+      return (abs(dx)==1 && abs(dy)==2) || (abs(dy)==1 && abs(dx)==2);
+    } else if (firstPiece.type == 'P') {
+      if ((dy>0&&c=='w')||(dy<0&&c=='b')) {
+        return false;
+      } else if (dx == 0) {
+        if (lastPiece != null) {
+          return false;
+        } else if (abs(dy)==1) {
+          return true;
+        } else if (abs(dy) == 2) {
+          int row = first.i;
+          return (row==1) || (row==6);
+        } else {
+          return false;
+        }
+      } else if (abs(dx) == 1) {
+        if (enPassant()) {
+          return true;
+        } else if (abs(dy) == 1) {
+          if (lastPiece == null) {
+            return false;
+          } else {
+            return firstPiece.colr != lastPiece.colr;
+          }
+        }
+      } else {
+        return false;
+      }
+    }
+    
+    return false;
+  }
+  
+  boolean jump() {
+    Piece firstPiece = pieces[first.i][first.j];
+    Piece lastPiece = pieces[last.i][last.j];
+    
+    int dx = last.j - first.j;
+    int dy = last.i - first.i;
+    
+    return false;
+  }
+  
+  boolean castling() {
+    return false;
+  }
+  
+  boolean enPassant() {
     return false;
   }
 
